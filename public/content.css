@@ -1,0 +1,37 @@
+div.fvr-modal {
+  position: absolute;
+  box-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  background-color: oklch(0.984 0.003 247.858);
+  padding: 10px;
+  z-index: 5000;
+  border-radius: 10px;
+  border: 1px solid oklch(0.929 0.013 255.508);
+}
+
+span.fvr-difficult {
+  background-color: oklch(0.81 0.117 11.638);
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+span.fvr-span:hover {
+  transition: all 0.2s;
+  background-color: oklch(0.962 0.044 156.743);
+  border-radius: 5px;
+}
+
+span.fvr-clicked {
+  background-color: oklch(0.962 0.044 156.743);
+  border-radius: 5px;
+  border: 1px solid oklch(0.929 0.013 255.508);
+}
+
+button.fvr-button {
+  margin: 0px 5px;
+  background-color: white;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid oklch(0.929 0.013 255.508);
+  box-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  cursor: pointer;
+}
