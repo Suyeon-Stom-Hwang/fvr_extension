@@ -1,24 +1,26 @@
-// const rephrase = (text: string) => {
-//   return "Test " + text.length;
-// };
-
-
-// simplify 함수 
+// simplify 함수
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
-const fetchRephrasedSentence = async (sentence: string, difficultWords: string[]) => {
+const fetchRephrasedSentence = async (
+  sentence: string,
+  difficultWords: string[]
+) => {
   if (!OPENAI_API_KEY) {
-    console.error("API Key is missing. Make sure to set VITE_OPENAI_API_KEY in .env file.");
+    console.error(
+      "API Key is missing. Make sure to set VITE_OPENAI_API_KEY in .env file."
+    );
     return "";
   }
-  
-  const prompt = `Rephrase the following sentence in simpler language, making sure to replace or explain the difficult words: "${sentence}" Difficult words: ${difficultWords.join(", ")}. Provide only the revised sentence without any extra words.`;
+
+  const prompt = `Rephrase the following sentence in simpler language, making sure to replace or explain the difficult words: "${sentence}" Difficult words: ${difficultWords.join(
+    ", "
+  )}. Provide only the revised sentence without any extra words.`;
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
       model: "gpt-4o",
@@ -29,9 +31,10 @@ const fetchRephrasedSentence = async (sentence: string, difficultWords: string[]
   });
 
   const data = await response.json();
-  return data.choices[0].message.content.trim();
+  const result = data.choices[0].message.content.trim();
+  console.log("fetchRephrasedSentence - ", result);
+  return result;
 };
-
 
 const getUserDifficultWords = async () => {
   return new Promise<string[]>((resolve, reject) => {
@@ -68,10 +71,9 @@ const removeExistingModal = () => {
   }
 };
 
-const clickWords = (e: MouseEvent) => {
-
+const handleWordClick = (e: MouseEvent) => {
   const word = (e.target as HTMLElement).innerText;
-  console.log("Clicked", word, e.target);
+  console.info("clickWords", word, e.target);
 
   removeExistingModal();
   document.querySelectorAll(".fvr-clicked").forEach((element) => {
@@ -83,7 +85,6 @@ const clickWords = (e: MouseEvent) => {
   modal.classList.add("fvr-modal");
   const targetRect = (e.target as HTMLElement).getBoundingClientRect();
   const scrollHeight = window.scrollY;
-  console.log("Target Rect", targetRect);
   const modalWidth = 200; // Adjust this value based on your modal's width
   const viewportWidth = window.innerWidth;
   const leftPosition = targetRect.right + 10;
@@ -95,42 +96,60 @@ const clickWords = (e: MouseEvent) => {
   }
   modal.style.top = `${scrollHeight + targetRect.top - 55}px`;
 
-  const button1 = document.createElement("button");
-  button1.classList.add("fvr-button");
-  button1.innerText = "Button 1";
-  button1.onclick = () => {
-    addDifficultWord(word);
-    (e.target as HTMLElement).classList.add("fvr-difficult");
+  const buttonAddWord = document.createElement("button");
+  buttonAddWord.classList.add("fvr-button");
+  buttonAddWord.innerText = "Add";
+  buttonAddWord.onclick = () => {
+    addDifficultWord(word.toLowerCase());
+    document.querySelectorAll(".fvr-span").forEach((element) => {
+      if (element.innerHTML.toLowerCase() === word) {
+        element.classList.add("fvr-difficult");
+      }
+    });
     document.body.removeChild(modal);
   };
 
-  const button2 = document.createElement("button");
-  button2.classList.add("fvr-button");
-  button2.innerText = "Button 2";
-  button2.onclick = () => {
-    removeDifficultWord(word);
-    (e.target as HTMLElement).classList.remove("fvr-difficult");
+  const buttonRemoveWord = document.createElement("button");
+  buttonRemoveWord.classList.add("fvr-button");
+  buttonRemoveWord.innerText = "Remove";
+  buttonRemoveWord.onclick = () => {
+    removeDifficultWord(word.toLowerCase());
+    document.querySelectorAll(".fvr-difficult").forEach((element) => {
+      if (element.innerHTML.toLowerCase() === word) {
+        element.classList.remove("fvr-difficult");
+      }
+    });
     document.body.removeChild(modal);
   };
 
-  modal.appendChild(button1);
-  modal.appendChild(button2);
+  modal.appendChild(buttonAddWord);
+  modal.appendChild(buttonRemoveWord);
   document.body.appendChild(modal);
 };
 
 const rephrasePage = async () => {
   const articles: HTMLParagraphElement[] = [];
-  document.querySelectorAll("p").forEach((element) => {
-    if (element.innerText.trim().split(/ +/).length > 5) {
-      articles.push(element);
-    }
-  });
-  console.log("Tags", articles.length);
+
+  document
+    .querySelectorAll("[fvr-data-original-content]")
+    .forEach((element) => {
+      articles.push(element as HTMLParagraphElement);
+    });
+
+  if (articles.length === 0) {
+    // Export more than 5 words
+    document.querySelectorAll("p").forEach((element) => {
+      if (element.innerText.trim().split(/ +/).length > 5) {
+        articles.push(element);
+      }
+    });
+  }
+  console.log("rephrasePage", articles.length);
 
   // Extract words without duplicates
   const words = articles.map((element) => element.innerText.split(/ +/));
   const uniqueWords = [...new Set(words.flat())];
-  console.log("Words", uniqueWords.length, uniqueWords);
+  console.log("uniqueWords", uniqueWords.length, uniqueWords);
 
   // Calc 5% of uniqueWords
   const numOfPreservedWords = Math.ceil(uniqueWords.length * 0.05);
@@ -138,24 +157,30 @@ const rephrasePage = async () => {
   // Extract difficult words according to the user's dictionary
   const userDiffcultWords = await getUserDifficultWords();
   const difficultWords = uniqueWords.filter((word) =>
-    userDiffcultWords.includes(word)
+    userDiffcultWords.includes(word.toLowerCase())
   );
+  console.log("Difficult Words", difficultWords.length, difficultWords);
+
   const preservedWords =
     difficultWords.length <= numOfPreservedWords
       ? difficultWords
       : difficultWords
           .sort(() => 0.5 - Math.random())
           .slice(0, numOfPreservedWords);
-  console.log("Difficult Words", difficultWords.length, difficultWords);
+  const unpreservedWords = userDiffcultWords.filter(
+    (word) => !preservedWords.includes(word)
+  );
 
   // Rephrase
-  articles.forEach((element) => {
-    // const rephrasedText = rephrase(element.innerText);
-    // TODO: Implement rephrasing
-    const rephrasedHTML = element.innerHTML.replace(
+  articles.forEach(async (element) => {
+    const rephrasedText: string = await fetchRephrasedSentence(
+      element.innerText,
+      unpreservedWords
+    );
+    const rephrasedHTML = rephrasedText.replace(
       /(\b\w+\b)(?![^<]*>)/g,
       (word) => {
-        if (preservedWords.includes(word)) {
+        if (userDiffcultWords.includes(word.toLowerCase())) {
           return `<span class='fvr-span fvr-difficult'">${word}</span>`;
         } else {
           return `<span class='fvr-span'>${word}</span>`;
@@ -163,18 +188,19 @@ const rephrasePage = async () => {
       }
     );
 
-    element.setAttribute("fvr-data-original-content", element.innerHTML);
+    if (!element.hasAttribute("fvr-data-original-content")) {
+      element.setAttribute("fvr-data-original-content", element.innerHTML);
+    }
     element.innerHTML = rephrasedHTML;
-  });
-
-  document.querySelectorAll(".fvr-span").forEach((element) => {
-    element.addEventListener("click", clickWords as EventListener);
+    element.querySelectorAll(".fvr-span").forEach((element) => {
+      element.addEventListener("click", handleWordClick as EventListener);
+    });
   });
 };
 
 const revertPage = () => {
   const articles = document.querySelectorAll("[fvr-data-original-content]");
-  console.log("Tags", articles.length);
+  console.log("revertPage", articles.length);
 
   // Revert
   articles.forEach((element) => {
@@ -206,7 +232,7 @@ const startLog = () => {
   loggingActive = true;
   console.log("Logging Started");
   const tracks = trackPage();
-//  jsIntervals = tracks?.intervals ?? [];
+  //  jsIntervals = tracks?.intervals ?? [];
   logFunc = tracks?.logFunc ?? (() => {});
 };
 

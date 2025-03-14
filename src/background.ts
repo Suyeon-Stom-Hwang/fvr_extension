@@ -61,17 +61,29 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
   } else if (message.action === "getUserDifficultWords") {
     // Retrieve stored difficult words
     console.log("Getting difficult words");
-    sendResponse(["announce", "inflation"]);
-    // chrome.storage.local.get("difficultWords", (data) => {
-    //   sendResponse(data.difficultWords || []);
-    // });
+    chrome.storage.local.get("difficultWords", (data) => {
+      sendResponse(data.difficultWords || []);
+      console.log("Getting difficult words", data.difficultWords);
+    });
     return true; // Keeps the response channel open for async responses
   } else if (message.action === "addDifficultWord") {
     // Store difficult words
-    // chrome.storage.local.set({ difficultWords: message.difficultWords });
+    chrome.storage.local.get("difficultWords", (data) => {
+      const words = data.difficultWords || [];
+
+      words.push(message.word);
+      chrome.storage.local.set({ difficultWords: words });
+      console.log("addDifficultWord", words);
+    });
   } else if (message.action === "removeDifficultWord") {
     // Store difficult words
-    // chrome.storage.local.set({ difficultWords: message.difficultWords });
+    chrome.storage.local.get("difficultWords", (data) => {
+      const words: string[] = data.difficultWords || [];
+
+      const newData = words.filter((word) => word !== message.word);
+      chrome.storage.local.set({ difficultWords: newData });
+      console.log("removeDifficultWord", newData);
+    });
   } else {
     console.log("Unknown message action:", message.action);
   }
