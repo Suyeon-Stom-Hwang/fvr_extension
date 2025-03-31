@@ -28,6 +28,12 @@ Beyond performance, smart advisors also suggest relevant certificates or program
     if (!tab.id) return;
     chrome.tabs.sendMessage(tab.id, { action: "revert" });
   };
+  
+  const checkWordsInPage = async () => {
+    const [tab] = await chrome.tabs.query({ active: true });
+    if (!tab.id) return;
+    chrome.tabs.sendMessage(tab.id, { action: "checkWords" });
+  };
 
   const startLog = async () => {
     const [tab] = await chrome.tabs.query({ active: true });
@@ -175,6 +181,12 @@ const handleFindLineNumbers = async () => {
   return (
     <div className="App">
       <div className="flex flex-col w-32 text-md gap-6 text-slate-900">
+        <button
+          className="bg-slate-100 rounded-lg p-1 cursor-pointer hover:bg-slate-200 transition-all shadow-lg"
+          onClick={checkWordsInPage}
+        >
+          Words Check Mode
+        </button>
         <button
           className="bg-slate-100 rounded-lg p-1 cursor-pointer hover:bg-slate-200 transition-all shadow-lg"
           onClick={rephrasePage}

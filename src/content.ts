@@ -201,6 +201,59 @@ const rephrasePage = async () => {
   });
 };
 
+const checkWordsInPage = async () => {
+  const articles: HTMLElement[] = [];
+
+  document
+    .querySelectorAll("[fvr-data-original-content]")
+    .forEach((element) => {
+      articles.push(element as HTMLParagraphElement);
+    });
+
+    if (articles.length === 0) {
+      // Export more than 5 words
+      document.querySelectorAll("p, h1, h2, a").forEach((element) => {
+        if (element instanceof HTMLElement) {
+        if (element.innerText.trim().split(/ +/).length > 5) {
+          articles.push(element);
+        }
+      }
+      });
+    }
+  console.log("checkWordsInPage", articles.length);
+
+  // Extract words without duplicates
+  const words = articles.map((element) => element.innerText.split(/ +/));
+  const uniqueWords = [...new Set(words.flat())];
+  console.log("uniqueWords", uniqueWords.length, uniqueWords);
+
+  // Extract difficult words according to the user's dictionary
+  const userDiffcultWords = await getUserDifficultWords();
+  console.log("All Difficult Words", userDiffcultWords.length, userDiffcultWords);
+
+  // Rephrase
+  articles.forEach(async (element) => {
+    const rephrasedHTML = element.innerText.slice().replace(
+      /(\b\w+\b)(?![^<]*>)/g,
+      (word) => {
+        if (userDiffcultWords.includes(word.toLowerCase())) {
+          return `<span class='fvr-span fvr-difficult'">${word}</span>`;
+        } else {
+          return `<span class='fvr-span'>${word}</span>`;
+        }
+      }
+    );
+
+    if (!element.hasAttribute("fvr-data-original-content")) {
+      element.setAttribute("fvr-data-original-content", element.innerHTML);
+    }
+    element.innerHTML = rephrasedHTML;
+    element.querySelectorAll(".fvr-span").forEach((element) => {
+      element.addEventListener("click", handleWordClick as EventListener);
+    });
+  });
+};
+
 const revertPage = () => {
   const articles = document.querySelectorAll("[fvr-data-original-content]");
   console.log("revertPage", articles.length);
@@ -321,6 +374,8 @@ const endLog = () => {
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "rephrase") {
     rephrasePage();
+  } else if (message.action === "checkWords") {
+    checkWordsInPage();
   } else if (message.action === "revert") {
     revertPage();
   } else if (message.action === "startLog") {
