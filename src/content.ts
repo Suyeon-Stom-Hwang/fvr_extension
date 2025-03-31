@@ -1,3 +1,4 @@
+console.log("✅ content.js loaded on", window.location.href);
 // simplify 함수
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -128,7 +129,7 @@ const handleWordClick = (e: MouseEvent) => {
 };
 
 const rephrasePage = async () => {
-  const articles: HTMLParagraphElement[] = [];
+  const articles: HTMLElement[] = [];
 
   document
     .querySelectorAll("[fvr-data-original-content]")
@@ -136,14 +137,16 @@ const rephrasePage = async () => {
       articles.push(element as HTMLParagraphElement);
     });
 
-  if (articles.length === 0) {
-    // Export more than 5 words
-    document.querySelectorAll("p").forEach((element) => {
-      if (element.innerText.trim().split(/ +/).length > 5) {
-        articles.push(element);
+    if (articles.length === 0) {
+      // Export more than 5 words
+      document.querySelectorAll("p, h1, h2, a").forEach((element) => {
+        if (element instanceof HTMLElement) {
+        if (element.innerText.trim().split(/ +/).length > 5) {
+          articles.push(element);
+        }
       }
-    });
-  }
+      });
+    }
   console.log("rephrasePage", articles.length);
 
   // Extract words without duplicates

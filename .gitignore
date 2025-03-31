@@ -25,3 +25,10 @@ dist-ssr
 
 
 .env
+
+
+# 모든 텍스트 파일은 자동 처리 (CRLF → LF 정리됨)
+* text=auto
+
+# CSV 파일은 LF로 고정
+*.csv text eol=lf

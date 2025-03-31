@@ -1,3 +1,4 @@
+// background.ts
 chrome.runtime.onInstalled.addListener(async () => {
   const manifest = chrome.runtime.getManifest();
   if (manifest.content_scripts) {
@@ -70,7 +71,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     // Store difficult words
     chrome.storage.local.get("difficultWords", (data) => {
       const words = data.difficultWords || [];
-
       words.push(message.word);
       chrome.storage.local.set({ difficultWords: words });
       console.log("addDifficultWord", words);
@@ -79,11 +79,17 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     // Store difficult words
     chrome.storage.local.get("difficultWords", (data) => {
       const words: string[] = data.difficultWords || [];
-
       const newData = words.filter((word) => word !== message.word);
       chrome.storage.local.set({ difficultWords: newData });
       console.log("removeDifficultWord", newData);
     });
+  } else if (message.action === "clearVocabulary") {
+    // 전체 단어장 삭제 기능: 저장된 difficultWords를 빈 배열로 설정
+    chrome.storage.local.set({ difficultWords: [] }, () => {
+      console.log("Vocabulary cleared");
+      sendResponse({ success: true });
+    });
+    return true; // Keeps the response channel open for async responses
   } else {
     console.log("Unknown message action:", message.action);
   }

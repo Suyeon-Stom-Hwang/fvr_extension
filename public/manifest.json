@@ -12,11 +12,20 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>",
+        "file://*/*"
+      ],
       "css": ["content.css"],
       "js": ["content.js"]
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sampleText.html", "sampleText.js"],
+      "matches": ["<all_urls>", "file://*/*"]
+    }
+  ],
   "permissions": ["scripting", "storage", "activeTab"],
-  "host_permissions": ["https://*/*", "http://*/*"]
+  "host_permissions": ["https://*/*", "http://*/*", "file://*/*"]
 }
