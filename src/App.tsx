@@ -10,12 +10,30 @@ function App() {
   const [averageLineNumber, setAverageLineNumber] = useState<number | null>(null);
   const [displayCount, setDisplayCount] = useState<number>(10);
 
-  const sampleText = `📰 1. Smart Advisors and the Rise of Data-Driven Education
-In recent years, educational institutions have increasingly turned to smart advisors—AI-powered systems designed to enhance student learning. These systems analyze census data, track usage patterns, and interpret charts to help students make optimal decisions about their academic paths.
+  const sampleText = `🌍 Brave Teen Makes Bold Career Move After Feat at Science Fair
 
-At Wilson University, for example, students receive weekly reports that combine tablet interaction logs and class routine analytics. “It’s like having a personal academic coach,” says Dr. Glen Park, a faculty member in educational technology.
+Last Friday, a brave high school student from Chicago made headlines after winning a national science fair. Before going to bed, she had no idea her life would change overnight.
 
-Beyond performance, smart advisors also suggest relevant certificates or programs based on individual strengths. Despite concerns about potential privacy threats, the collaborative development of such systems promises a more inclusive, data-driven future in education.`;
+Samantha Lee, 17, said, “I always wanted to be a scientist. I didn’t assume I would win, but I gave it my best.” She created a new type of peptide that could help treat rare diseases. Judges called her project a “remarkable scientific feat.”
+
+Samantha used advanced methods to assay the samples and even learned how to encode protein structures. “I had to immerse myself in books and lab work. It wasn’t easy,” she said. Her efforts helped her acquire knowledge far beyond the average student.
+
+The project was no small burden. “There were times I wanted to cease, but my family would console me. I learned to stay calm and decisive even under pressure.”
+
+Samantha wore a white tunic and a plaid scarf at the awards ceremony. “She looked so chic!” said one judge. When her name was announced, the crowd began to clap loudly, and she couldn’t help but blush.
+
+Some media outlets started to peddle rumors about her discovery, but scientists were quick to cite her official work. “There’s no need to surmise or deduce beyond the facts,” said Dr. Greene, a science professor.
+
+Her next step? A career in biomedical research. She hopes to create capsules that can safely deliver medicine to the body. She’s already working on a way to condense large proteins for easier use.
+
+Samantha's family, including her brother who wears a pilot’s tunic, were proud. “We coexist peacefully even when stressed,” said her mother. “We faced tough times, but nothing bad has ever befallen us that we couldn’t overcome.”
+
+In a world filled with chaos, Samantha’s stoic attitude is refreshing. “She’s not just smart, she’s bold,” her teacher said.
+
+For now, Samantha will continue studying while enjoying root lager, using a garden hose, and learning how a rudder steers a boat—all part of a science kit she received as a prize. She may be young, but she’s already guiding her life like a seasoned captain.
+
+After the fair, Samantha said, “You don’t just get results—you have to give everything.” Her first experiment had a major flaw, but she learned to adjust quickly. She added a gloss in her report to explain complex ideas and studied the causal links behind rare conditions, including those related to incest, a topic she handled with care. One night, with only dry bread’s crust and tea, she worked late under the dun sky, determined to finish.
+`;
 
   const rephrasePage = async () => {
     const [tab] = await chrome.tabs.query({ active: true });
@@ -253,7 +271,7 @@ const handleFindLineNumbers = async () => {
       {showSampleText && (
         <div
           className="mt-4 p-4 border rounded bg-slate-50"
-          style={{ width: "700px", margin: "auto" }}
+          style={{ width: "400px", margin: "auto" }}
         >
           <h3 className="text-lg font-bold mb-2">Sample Text</h3>
           <div
@@ -265,24 +283,31 @@ const handleFindLineNumbers = async () => {
               wordBreak: "break-word"
             }}
           >
-            {sampleText.split(/\s+/).map((word, idx) => {
-              const normalized = word.toLowerCase().replace(/[^a-z0-9]/gi, "");
-              return (
-                <span
-                  key={idx}
-                  onClick={() => handleWordSelection(word)}
-                  style={{
-                    cursor: "pointer",
-                    backgroundColor: vocabulary.includes(normalized)
-                      ? "#ccffcc"
-                      : "transparent",
-                    marginRight: "4px"
-                  }}
-                >
-                  {word}
-                </span>
-              );
-            })}
+{sampleText.split("\n").map((paragraph, idx) => (
+  <p key={idx} style={{ marginBottom: "1em" }}>
+    {paragraph.split(/\s+/).map((word, wordIdx) => {
+      const normalized = word.toLowerCase().replace(/[^a-z0-9]/gi, "");
+      return (
+        <span
+          key={wordIdx}
+          onClick={() => handleWordSelection(word)}
+          style={{
+            cursor: "pointer",
+            backgroundColor: vocabulary.includes(normalized)
+              ? "#ccffcc"
+              : "transparent",
+            marginRight: "4px",
+            display: "inline-block",
+            wordBreak: "keep-all",
+            overflowWrap: "break-word",
+          }}
+        >
+          {word}
+        </span>
+      );
+    })}
+  </p>
+))}
           </div>
         </div>
       )}
